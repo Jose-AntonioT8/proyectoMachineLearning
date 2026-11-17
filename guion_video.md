@@ -1,176 +1,387 @@
-# Guion del vídeo explicativo — Proyecto ML gasto turístico INE
+# Guion del vídeo — qué decir en cada celda
 
-**Duración objetivo:** 8–9 minutos (máximo 10).  
-**Formato:** pantalla compartida del cuaderno `tarea.ipynb` + voz en off o cámara pequeña.  
-**Consejo:** habla despacio, no leas el código línea a línea; enseña la celda o la gráfica y explica la idea.
+**Duración:** 8–9 minutos (máximo 10).  
+**Cómo usarlo:** abre `tarea.ipynb` ejecutado y ve bajando celda a celda. En cada **celda de código** di el texto de “Hablar”. Si la celda es solo técnica, di poco y pasa.
 
----
-
-## Antes de grabar (checklist)
-
-1. Abre `tarea.ipynb` ya ejecutado (con salidas y gráficas visibles).
-2. Ten a mano la tabla de comparación de modelos y el bloque de conclusiones.
-3. En YouTube: vídeo público o “no listado”; el enlace irá al final del cuaderno.
-4. Tiempo aproximado por bloque (suma ≈ 8,5 min):
-
-| Minuto | Bloque |
-| --- | --- |
-| 0:00–0:45 | Presentación y problema |
-| 0:45–1:45 | Datos (obtención + descripción) |
-| 1:45–3:30 | Exploración y gráficas |
-| 3:30–4:15 | Objetivo / target |
-| 4:15–5:30 | Preparación |
-| 5:30–7:30 | Entrenamiento y métricas |
-| 7:30–8:45 | Conclusiones y cierre |
+**Leyenda**
+- **Hablar:** lo que dices en voz alta.
+- **Pantalla:** qué señalar o enseñar.
+- **Paso rápido:** no te pares; 5–10 segundos.
 
 ---
 
-## 0:00 — Presentación (≈ 45 s)
+## Antes de la primera celda de código
 
-**En pantalla:** título del cuaderno (primera celda markdown).
+**Pantalla:** título del cuaderno (markdown inicial).
 
-**Di:**
-
-> Hola. Soy Jose. Este es mi proyecto completo de Machine Learning.
->
-> Trabajo con una estadística del INE: la distribución del gasto turístico de los residentes en España según el país de destino. La tabla es la 58692.
->
-> El problema es de regresión supervisada: quiero predecir cuánto se gasta, en euros, en un país concreto durante un mes. Uso esa predicción como si fuera una consultora que necesita anticipar el volumen de gasto hacia cada destino.
+**Hablar:**
+> Hola, soy [tu nombre]. Este es mi proyecto completo de Machine Learning. Predigo el gasto turístico mensual de los residentes en España por país de destino, con datos del INE. Es un problema de regresión supervisada y la métrica principal es el RMSE.
 
 ---
 
-## 0:45 — Obtención y descripción de los datos (≈ 1 min)
+## 1. Obtención de datos
 
-**En pantalla:** celda de carga del CSV y tabla de atributos.
+### Celda 1 — imports (`numpy`, `pandas`, `matplotlib`…)
 
-**Di:**
+**Paso rápido.**
 
-> Los datos no vienen de un sensor ni de una encuesta propia. Son una estadística oficial del Instituto Nacional de Estadística. El fichero es un CSV separado por punto y coma.
->
-> En bruto hay cuatro columnas: el país de destino, el tipo de magnitud, el periodo mensual —por ejemplo 2024M08— y el importe en texto. Hay tres magnitudes: gasto turístico total, gasto medio diario y gasto con tarjeta. Todo está en euros.
->
-> El fichero viene en formato largo: una fila por país, magnitud y mes. En total unas cuarenta y cuatro mil filas, con ciento sesenta y cinco países y noventa meses, de enero de 2019 a junio de 2026.
->
-> Cuando el INE no publica la cifra, aparece un punto o una celda vacía. Eso no es un cero: es un dato no publicado.
+**Hablar:**
+> Cargo las librerías habituales: pandas para la tabla, matplotlib y seaborn para gráficas, y más adelante scikit-learn para los modelos.
 
 ---
 
-## 1:45 — Exploración y visualización (≈ 1 min 45 s)
+### Celda 2 — cargar `58692.csv`
 
-**En pantalla:** histogramas, serie temporal, correlación. Ve pasando las gráficas mientras hablas.
+**Pantalla:** las primeras filas del dataframe.
 
-**Di:**
-
-> Primero limpio los importes: el INE usa punto de miles y coma decimal. Después paso a formato ancho: una fila por país y mes, con una columna para cada magnitud.
->
-> Aquí se ve el sesgo del gasto total: casi todos los países-mes son relativamente bajos y unos pocos destinos grandes estiran la escala. Por eso el histograma del total lo muestro hasta veinte millones de euros, y la cola grande se entiende mejor en escala logarítmica.
->
-> También hay estacionalidad clara: en verano el gasto total sube. En 2020 y 2021 faltan muchos datos —alrededor del 64 % en 2020 y la mitad en 2021— por las restricciones de viaje.
->
-> Un detalle importante: el gasto total y el gasto con tarjeta tienen una correlación cercana a 0,98. Se mueven juntos y el INE las publica a la vez. Si metiera el gasto con tarjeta como predictor, casi le estaría dando al modelo la respuesta.
->
-> El gasto medio diario, en cambio, cuenta otra historia: en agosto el volumen sube, pero el gasto por día no. Por eso no lo uso como entrada del modelo.
+**Hablar:**
+> Aquí cargo el CSV del INE, separado por punto y coma. Renombro las columnas a nombres más claros: país, tipo de gasto, periodo y total. La fuente es la tabla 58692: estadística oficial, no un sensor ni una encuesta mía.
 
 ---
 
-## 3:30 — Objetivo del proyecto (≈ 45 s)
+### Celda 3 — tamaño del dataset
 
-**En pantalla:** apartado “Exposición del objetivo”.
+**Pantalla:** los `print` (filas, países, periodos).
 
-**Di:**
-
-> El target es el gasto turístico mensual: euros gastados por los residentes en España en un país de destino durante un mes.
->
-> Es aprendizaje supervisado porque el INE ya etiquetó cada país-mes. Es regresión múltiple porque predigo un número a partir de varias características.
->
-> La métrica principal es el RMSE en euros. También miro el R cuadrado y el error absoluto mediano, porque el RMSE se deja arrastrar por destinos enormes como Francia o Portugal.
+**Hablar:**
+> Tenemos unas cuarenta y cuatro mil filas, ciento sesenta y cinco países, tres magnitudes y noventa meses, de enero de 2019 a junio de 2026.
 
 ---
 
-## 4:15 — Preparación de los datos (≈ 1 min 15 s)
+## 2–3. Descripción y exploración
 
-**En pantalla:** preparación, one-hot, `train_test_split`.
+*(El markdown de descripción: pásalo despacio 10–15 s y di: “Estas cuatro columnas son país, tipo de magnitud, mes e importe; el importe viene en texto con el formato del INE.”)*
 
-**Di:**
+### Celda 4 — `value_counts` de `tipo_gasto`
 
-> Para entrenar solo uso tres predictores: el país, el mes y el año. No uso la región, ni el gasto diario, ni el gasto con tarjeta.
->
-> Quito las filas sin gasto publicado. No relleno con la mediana: inventaría una etiqueta. Me quedo con unas nueve mil quinientas instancias y ciento treinta y nueve países.
->
-> El país y el mes son categorías: los paso a one-hot, columnas de ceros y unos. El año se queda como número.
->
-> Barajo los datos y hago una partición 80-20: entrenamiento y prueba. El conjunto de prueba no entra en el ajuste de hiperparámetros. Más adelante repito la evaluación con un corte temporal: entrenar hasta 2024 y probar 2025-2026.
+**Hablar:**
+> Las tres series tienen el mismo número de filas: gasto turístico total, gasto medio diario y gasto con tarjeta. El fichero está en formato largo: tres filas por cada país y mes.
 
 ---
 
-## 5:30 — Entrenamiento y rendimiento (≈ 2 min)
+### Celda 5 — función `euros_ine` y conversión a número
 
-**En pantalla:** comparación de modelos, GridSearch, métricas de test y prueba temporal.
+**Pantalla:** columna `euros` junto a `total`.
 
-**Di:**
-
-> Comparo tres modelos: regresión lineal, árbol de decisión y bosque aleatorio. Los evalúo primero con validación cruzada sobre el entrenamiento.
->
-> La regresión lineal es la referencia. Solo suma efecto de país, efecto de mes y tendencia anual. No captura bien las interacciones y a veces estima gastos negativos.
->
-> El árbol memoriza el entrenamiento: el error ahí llega a cero, pero en validación cruzada empeora. Eso es sobreajuste.
->
-> El bosque aleatorio equilibra mejor. Tras una búsqueda pequeña de hiperparámetros, el modelo elegido es el bosque ajustado.
->
-> En el conjunto de prueba, el RMSE ronda los diez millones de euros, el error absoluto mediano unos cuatrocientos treinta mil euros, y el R cuadrado alrededor de 0,91.
->
-> En la prueba temporal, entrenando solo hasta 2024 y evaluando 2025-2026, el R cuadrado se mantiene alto, cerca de 0,95. El patrón país-mes es bastante estable de un año a otro.
->
-> Interpreto el RMSE con cuidado: la mediana del gasto mensual está cerca de un millón y medio de euros, y unos pocos destinos superan los cien millones. El error mediano describe mejor el caso típico.
+**Hablar:**
+> Convierto el texto del INE a número. El gasto medio usa coma decimal; el total y la tarjeta usan punto de miles. El punto solo o la celda vacía son datos no publicados, no ceros.
 
 ---
 
-## 7:30 — Conclusiones y cierre (≈ 1 min 15 s)
+### Celda 6 — ejemplo Albania 2026M06
 
-**En pantalla:** conclusiones + predicciones de ejemplo (Portugal, Japón, Marruecos) si quieres.
+**Paso rápido.**
 
-**Di:**
-
-> En resumen: con país, mes y año se puede estimar el gasto turístico mensual del INE. El bosque supera a la recta porque captura la interacción entre destino y temporada.
->
-> El proyecto tiene límites claros. Faltan muchos países-mes de 2020 y 2021, y varios países no tienen ninguna cifra. El modelo aproxima la estadística oficial; no explica por qué crece un destino ni anticipa shocks como una huelga aérea.
->
-> Las predicciones de 2027 son escenarios: prolongan el patrón visto, no son un dato del INE.
->
-> El cuaderno está en Google Colab en modo lectura y este vídeo queda enlazado desde el propio cuaderno.
->
-> Gracias por verlo.
+**Hablar:**
+> Compruebo con Albania en junio de 2026: el total se lee en millones y el gasto medio diario en cientos de euros. La conversión es correcta.
 
 ---
 
-## Frases de apoyo si te sobra o falta tiempo
+### Celda 7 — pivot a formato ancho
 
-**Si vas corto (añade 20–30 s):**
+**Pantalla:** columnas `gasto_turistico`, `gasto_medio_diario`, `gasto_tarjeta`.
 
-- Enseña una gráfica de los cinco destinos grandes y di: “Francia, Italia o Portugal repiten el mismo dibujo cada año; eso es lo que el modelo puede aprender.”
-- Enseña la importancia de características del bosque y di: “Estas barras son orientativas: dicen qué columnas usa el modelo, no una causa.”
-
-**Si vas largo (recorta):**
-
-- Omite la fórmula del RMSE; basta decir “penaliza más los errores grandes y se mide en euros”.
-- Omite el detalle de GridSearch; di solo “ajusté una rejilla pequeña y me quedé con el mejor RMSE de validación”.
-- Omite los tres escenarios de 2027.
+**Hablar:**
+> Paso a formato ancho: una fila por país y mes, con una columna para cada magnitud. También saco año, mes y fecha. Hay catorce mil ochocientas cincuenta combinaciones; unas nueve mil quinientas tienen el gasto publicado.
 
 ---
 
-## Texto corto para la descripción de YouTube
+### Celda 8 — `describe()`
+
+**Hablar:**
+> Las escalas no se parecen. El gasto total tiene mediana de unos uno o dos millones y media mucho más alta: unos pocos destinos grandes estiran la media. El gasto medio diario vive en otra escala, alrededor de cien a doscientos cincuenta euros.
+
+---
+
+### Celda 9 — nulos por magnitud y por año
+
+**Pantalla:** totales de huecos y tabla por año.
+
+**Hablar:**
+> Hay más de cinco mil países-mes sin cifra. Los tres huecos coinciden: o el INE publica las tres magnitudes o no publica ninguna. En 2020 falta cerca del 64 % y en 2021 la mitad; son los años de restricciones.
+
+---
+
+### Celda 10 — gráfica de huecos por año
+
+**Hablar:**
+> Esta barra lo deja claro: 2020 y 2021 rompen la serie. Esos huecos no se rellenan con una mediana: no hay un gasto típico válido para todos los destinos.
+
+---
+
+### Celda 11 — asignar región / continente
+
+**Paso rápido.**
+
+**Hablar:**
+> Añado una región continental solo para explorar. El modelo más adelante usará el país, no la región, porque dentro de Europa conviven destinos muy distintos.
+
+---
+
+### Celda 12 — histogramas de las tres magnitudes
+
+**Pantalla:** los tres paneles.
+
+**Hablar:**
+> El primer histograma corta el eje en veinte millones para que se vea la mayoría de países. El del medio, en logaritmo, enseña la cola grande. El tercero es el gasto medio diario, mucho más concentrado.
+
+---
+
+### Celda 13 — top 12 destinos por mediana
+
+**Hablar:**
+> Estos son los destinos con mayor gasto mensual mediano. Unos pocos países concentran casi todo el volumen.
+
+---
+
+### Celda 14 — serie temporal del gasto total
+
+**Hablar:**
+> Sumando todos los destinos se ve la onda estacional: cada verano sube. La franja roja marca 2020 y principios de 2021, cuando el gasto se hunde.
+
+---
+
+### Celda 15 — top 5 destinos en el tiempo
+
+**Hablar:**
+> Los cinco destinos grandes repiten el mismo dibujo año tras año, cada uno a su nivel. Esa repetición es lo que un modelo puede aprender.
+
+---
+
+### Celda 16 — mediana por mes (total vs diario)
+
+**Hablar:**
+> En agosto el gasto total es máximo, pero el gasto medio diario es de los más bajos. Viaja más gente y se queda más tiempo; no gasta más cada día. Son dos fenómenos distintos.
+
+---
+
+### Celda 17 — boxplot por región
+
+**Paso rápido.**
+
+**Hablar:**
+> Por continente hay diferencias de nivel, pero la región sola no basta: dentro de cada una hay destinos muy dispares.
+
+---
+
+### Celda 18 — matriz de correlación
+
+**Pantalla:** heatmap.
+
+**Hablar:**
+> Esta matriz decide el diseño. Gasto total y gasto con tarjeta correlacionan cerca de 0,98: casi la misma información. El gasto medio diario casi no se relaciona con el volumen. Por eso el modelo no recibe ni la tarjeta ni el diario: solo país, mes y año.
+
+---
+
+## 4. Objetivo
+
+**Pantalla:** markdown del objetivo (no hay código).
+
+**Hablar:**
+> El target es el gasto turístico mensual en euros. Supervisado y regresión múltiple. Métrica principal: RMSE; también miro R cuadrado y el error absoluto mediano.
+
+---
+
+## 5. Preparación
+
+### Celda 19 — dataset del modelo (quitar nulos del target)
+
+**Hablar:**
+> Quito las filas sin gasto publicado. Me quedo con país, mes, año y el target. Unas nueve mil quinientas instancias y ciento treinta y nueve países. No relleno nulos: inventaría la etiqueta.
+
+---
+
+### Celda 20 — one-hot de país y mes
+
+**Hablar:**
+> País y mes no tienen orden natural, así que los paso a one-hot: una columna de ceros y unos por cada categoría. El año se queda numérico. Acabamos con unas ciento cincuenta columnas.
+
+---
+
+### Celda 21 — barajar
+
+**Paso rápido.**
+
+**Hablar:**
+> Barajo el dataset para que no queden países o meses agrupados al hacer la partición.
+
+---
+
+### Celda 22 — separar `X` e `y`
+
+**Hablar:**
+> `y` es el gasto turístico. `X` son solo las características: año y las columnas one-hot de país y mes.
+
+---
+
+### Celda 23 — `train_test_split` 80/20
+
+**Hablar:**
+> Ochenta por ciento entrenamiento, veinte por ciento prueba. La prueba no se usa para elegir el modelo ni para afinar hiperparámetros.
+
+---
+
+## 6. Entrenamiento
+
+### Celda 24 — función de validación cruzada
+
+**Paso rápido.**
+
+**Hablar:**
+> Defino una validación cruzada con tres particiones. Comparo modelos con RMSE y R cuadrado medios, sin tocar todavía el test.
+
+---
+
+### Celda 25 — regresión lineal (predicciones entrenamiento)
+
+**Pantalla:** alguna fila con error grande o negativo.
+
+**Hablar:**
+> Empiezo con regresión lineal. En entrenamiento ya se ven errores grandes y a veces predicciones negativas: la recta suma efectos de país y mes, pero no captura bien las interacciones.
+
+---
+
+### Celda 26 — métricas lineal + CV
+
+**Hablar:**
+> En validación cruzada la lineal ronda unos veintiún millones de RMSE y un R cuadrado de unos 0,70. Es la referencia, no el mejor modelo.
+
+---
+
+### Celda 27 — árbol de decisión (predicciones)
+
+**Hablar:**
+> El árbol parte con preguntas del tipo “¿es Francia?”, “¿es agosto?”. En entrenamiento acierta casi todo.
+
+---
+
+### Celda 28 — métricas árbol + CV
+
+**Hablar:**
+> El RMSE de entrenamiento es cero, pero en validación cruzada sube mucho. Eso es sobreajuste: memoriza los datos vistos. No lo elijo por el error de entrenamiento.
+
+---
+
+### Celda 29 — bosque aleatorio (predicciones)
+
+**Hablar:**
+> El bosque promedia muchos árboles. En entrenamiento el error baja, pero no a cero como el árbol solo.
+
+---
+
+### Celda 30 — métricas bosque + CV
+
+**Hablar:**
+> En validación cruzada el bosque mejora a la lineal y al árbol: menor RMSE y mayor R cuadrado. De momento es el favorito.
+
+---
+
+### Celda 31 — tabla comparativa
+
+**Pantalla:** tabla ordenada.
+
+**Hablar:**
+> Aquí se ven los tres juntos, ordenados por RMSE de validación. Gana el bosque.
+
+---
+
+### Celda 32 — `GridSearchCV` y bosque ajustado
+
+**Hablar:**
+> Un hiperparámetro es una opción que fijas *antes* de entrenar, no la aprende el modelo solo: por ejemplo cuántos árboles tiene el bosque o qué profundidad máxima puede tener cada árbol. Como en clase no hemos tocado esto, lo resumo así: en vez de probar a mano, preparo una *rejilla* pequeña: una tabla con unas pocas combinaciones de esos valores. `GridSearchCV` las prueba todas sobre una muestra del entrenamiento, midiendo cada una con la misma validación cruzada. Me quedo con la combinación que mejor sale. Luego el bosque ajustado se vuelve a medir; si mejora respecto al bosque por defecto, se queda; si no, no forzamos el cambio. En este caso sí mejora y queda como mejor modelo.
+
+---
+
+### Celda 33 — elegir `modelo_final`
+
+**Paso rápido.**
+
+**Hablar:**
+> El modelo elegido es el bosque ajustado. Lo reentreno con todo el conjunto de entrenamiento.
+
+---
+
+### Celda 34 — evaluación en test + gráfica real vs estimado
+
+**Pantalla:** métricas y el scatter.
+
+**Hablar:**
+> Hasta ahora solo hemos comparado modelos con validación cruzada sobre el entrenamiento. El test es el 20 % de filas que apartamos al principio y no hemos usado para elegir ni para ajustar el bosque: es el examen final con datos que el modelo no ha visto. Le pido predicciones de gasto para esas filas y las comparo con el valor real del INE. El RMSE sale de unos diez millones de euros: es la raíz del error cuadrático medio, así que los destinos con mucho gasto pesan más. El error mediano es más bajo, unos cuatrocientos treinta mil, y describe mejor el típico país-mes. El R cuadrado cerca de 0,91 dice que el modelo explica casi todo el patrón del test. En la gráfica, cada punto es un caso real frente a lo estimado; la diagonal roja sería el acierto perfecto. En escala logarítmica se ve que no solo acierta los destinos enormes: también se acerca en los medianos y pequeños.
+
+---
+
+### Celda 35 — prueba temporal 2025–2026
+
+**Hablar:**
+> Compruebo también un corte temporal: entreno hasta 2024 y pruebo 2025-2026. El R cuadrado se mantiene alto, cerca de 0,95. El patrón país-mes aguanta de un año a otro.
+
+---
+
+## 7. Conclusiones
+
+**Pantalla:** markdown de conclusiones (léelo resumido, 30–40 s).
+
+**Hablar:**
+> En resumen: con país, mes y año se estima el gasto mensual. El bosque gana porque captura destino y temporada. El RMSE hay que leerlo junto al error mediano, porque unos pocos países grandes pesan mucho. Hay límites: faltan datos de pandemia y el modelo no anticipa shocks externos.
+
+---
+
+### Celda 36 — importancia de características
+
+**Hablar:**
+> Estas barras muestran qué columnas usa más el bosque. Es orientativo, no causal: señala variables útiles, no causas del gasto.
+
+---
+
+### Celda 37 — predicciones 2027 (Portugal, Japón, Marruecos)
+
+**Hablar:**
+> Creo tres escenarios futuros: Portugal en agosto, Japón en febrero y Marruecos en diciembre de 2027. No hay cifra real del INE con la que contrastar: son proyecciones del patrón aprendido.
+
+---
+
+### Celda 38 — histórico del mismo país-mes
+
+**Hablar:**
+> Aquí está el histórico del INE para esos mismos meses. Las predicciones de 2027 se parecen al último año visto. Tiene sentido si el destino no cambia de régimen; una huelga o un evento grande no están en las variables.
+
+---
+
+## Cierre (última markdown de entrega)
+
+**Hablar:**
+> El cuaderno estará en Colab en modo lectura y este vídeo queda enlazado desde el propio cuaderno. Gracias.
+
+---
+
+## Si vas largo: celdas que puedes saltar casi sin hablar
+
+- Celda 1 (imports)
+- Celda 6 (ejemplo Albania)
+- Celda 11 (regiones)
+- Celda 17 (boxplot región)
+- Celda 21 (barajar)
+- Celda 24 (definición CV)
+- Celda 33 (print del modelo elegido)
+
+## Si vas corto: celdas en las que sí debes pararte
+
+- Celda 2 (datos / fuente)
+- Celda 9 o 10 (nulos)
+- Celda 16 (agosto: total alto, diario bajo)
+- Celda 18 (correlación)
+- Celdas 26 / 28 / 30 (métricas de los tres modelos)
+- Celda 34 (test)
+- Celda 35 (temporal)
+- Conclusiones (markdown)
+
+---
+
+## Texto para YouTube
 
 ```text
 Proyecto completo de Machine Learning — Máster FP IA y Big Data.
 Dataset: INE tabla 58692 (gasto turístico por país de destino).
-Objetivo: predecir el gasto turístico mensual (euros) a partir de país, mes y año.
+Objetivo: predecir el gasto turístico mensual (euros) con país, mes y año.
 Cuaderno Colab: [pegar enlace]
 ```
-
----
-
-## Tras grabar
-
-1. Sube el vídeo a YouTube.
-2. Pega el enlace en la celda final del cuaderno (`tarea.ipynb`), junto al enlace de Colab.
-3. Comprueba que el vídeo se abre sin login (público o no listado).
